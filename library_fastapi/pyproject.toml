@@ -1,0 +1,30 @@
+[project]
+name = "biblioteca-virtual"
+version = "1.0.0"
+description = "API REST para cadastro e consulta de livros em uma biblioteca virtual"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.162.0",
+    "uvicorn>=0.54.0",
+    "sqlalchemy>=2.1.6",
+    "pydantic>=2.14.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".."]
+asyncio_default_fixture_loop_scope = "function"
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "unit: fast isolated tests with no external dependencies",
+    "integration: tests that require a real database or HTTP client",
+]

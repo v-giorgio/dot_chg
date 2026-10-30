@@ -1,0 +1,494 @@
+{
+  "info": {
+    "_postman_id": "biblioteca-virtual-api-v1",
+    "name": "Biblioteca Virtual API",
+    "description": "API REST para cadastro e consulta de livros em uma biblioteca virtual.\n\nBase URL: http://localhost:8000\n\nTodas as respostas de sucesso seguem o envelope:\n{\n  \"status_code\": <int>,\n  \"data\": <payload | null>\n}",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string",
+      "description": "URL base da API"
+    },
+    {
+      "key": "book_id",
+      "value": "1",
+      "type": "string",
+      "description": "ID do livro para testes de GET /books/{id}, PUT e DELETE"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "description": "Verificação de disponibilidade da API.",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": ["{{base_url}}"],
+              "path": [""]
+            },
+            "description": "Verifica se a API está no ar."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status_code\": 200,\n  \"data\": {\n    \"status\": \"ok\",\n    \"message\": \"Biblioteca Virtual API\"\n  }\n}",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/", "host": ["{{base_url}}"], "path": [""] }
+              }
+            },
+            {
+              "name": "500 Internal Server Error",
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": \"Internal Server Error\"\n}",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/", "host": ["{{base_url}}"], "path": [""] }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "description": "CRUD de livros com soft delete e paginação.",
+      "item": [
+        {
+          "name": "Cadastrar livro",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Dom Casmurro\",\n  \"author\": \"Machado de Assis\",\n  \"publication_date\": \"1899-01-01\",\n  \"summary\": \"Romance que narra a história de Bentinho e Capitu.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/books/",
+              "host": ["{{base_url}}"],
+              "path": ["books", ""]
+            },
+            "description": "Cadastra um novo livro na biblioteca.\n\nCampos obrigatórios: title, author, publication_date.\nCampo opcional: summary."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status_code\": 201,\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Dom Casmurro\",\n    \"author\": \"Machado de Assis\",\n    \"publication_date\": \"1899-01-01\",\n    \"summary\": \"Romance que narra a história de Bentinho e Capitu.\"\n  }\n}",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Dom Casmurro\",\n  \"author\": \"Machado de Assis\",\n  \"publication_date\": \"1899-01-01\",\n  \"summary\": \"Romance que narra a história de Bentinho e Capitu.\"\n}"
+                },
+                "url": { "raw": "{{base_url}}/books/", "host": ["{{base_url}}"], "path": ["books", ""] }
+              }
+            },
+            {
+              "name": "422 Unprocessable Entity - campo obrigatório ausente",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": [\n    {\n      \"type\": \"missing\",\n      \"loc\": [\"body\", \"title\"],\n      \"msg\": \"Field required\",\n      \"input\": {\n        \"author\": \"Machado de Assis\",\n        \"publication_date\": \"1899-01-01\"\n      }\n    }\n  ]\n}",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"author\": \"Machado de Assis\",\n  \"publication_date\": \"1899-01-01\"\n}"
+                },
+                "url": { "raw": "{{base_url}}/books/", "host": ["{{base_url}}"], "path": ["books", ""] }
+              }
+            },
+            {
+              "name": "422 Unprocessable Entity - title vazio",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": [\n    {\n      \"type\": \"string_too_short\",\n      \"loc\": [\"body\", \"title\"],\n      \"msg\": \"String should have at least 1 character\",\n      \"input\": \"\"\n    }\n  ]\n}",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"\",\n  \"author\": \"Machado de Assis\",\n  \"publication_date\": \"1899-01-01\"\n}"
+                },
+                "url": { "raw": "{{base_url}}/books/", "host": ["{{base_url}}"], "path": ["books", ""] }
+              }
+            },
+            {
+              "name": "422 Unprocessable Entity - data inválida",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": [\n    {\n      \"type\": \"date_from_datetime_parsing\",\n      \"loc\": [\"body\", \"publication_date\"],\n      \"msg\": \"Input should be a valid date or datetime, invalid character in year\",\n      \"input\": \"01/01/1899\"\n    }\n  ]\n}",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Dom Casmurro\",\n  \"author\": \"Machado de Assis\",\n  \"publication_date\": \"01/01/1899\"\n}"
+                },
+                "url": { "raw": "{{base_url}}/books/", "host": ["{{base_url}}"], "path": ["books", ""] }
+              }
+            },
+            {
+              "name": "500 Internal Server Error",
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": \"Internal Server Error\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Consultar livros",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/books/?page=1&page_size=10",
+              "host": ["{{base_url}}"],
+              "path": ["books", ""],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "",
+                  "description": "Filtro parcial e case-insensitive pelo título",
+                  "disabled": true
+                },
+                {
+                  "key": "author",
+                  "value": "",
+                  "description": "Filtro parcial e case-insensitive pelo autor",
+                  "disabled": true
+                },
+                {
+                  "key": "publication_date",
+                  "value": "",
+                  "description": "Filtro por data exata (YYYY-MM-DD)",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número da página (mínimo 1)"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10",
+                  "description": "Itens por página (mínimo 1, máximo 100)"
+                }
+              ]
+            },
+            "description": "Lista livros ativos com paginação e filtros opcionais.\n\nQuando title e author são informados juntos, a busca retorna a união (OR) dos resultados."
+          },
+          "response": [
+            {
+              "name": "200 OK - lista com resultados",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status_code\": 200,\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": 1,\n        \"title\": \"Dom Casmurro\",\n        \"author\": \"Machado de Assis\",\n        \"publication_date\": \"1899-01-01\",\n        \"summary\": \"Romance que narra a história de Bentinho e Capitu.\"\n      },\n      {\n        \"id\": 2,\n        \"title\": \"Duna\",\n        \"author\": \"Frank Herbert\",\n        \"publication_date\": \"1965-08-01\",\n        \"summary\": \"Épico de ficção científica ambientado no planeta Arrakis.\"\n      }\n    ],\n    \"total\": 2,\n    \"page\": 1,\n    \"page_size\": 10,\n    \"pages\": 1\n  }\n}",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/books/?page=1&page_size=10", "host": ["{{base_url}}"], "path": ["books", ""], "query": [{ "key": "page", "value": "1" }, { "key": "page_size", "value": "10" }] }
+              }
+            },
+            {
+              "name": "200 OK - lista vazia",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status_code\": 200,\n  \"data\": {\n    \"items\": [],\n    \"total\": 0,\n    \"page\": 1,\n    \"page_size\": 10,\n    \"pages\": 0\n  }\n}"
+            },
+            {
+              "name": "200 OK - filtro por título",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status_code\": 200,\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": 1,\n        \"title\": \"Dom Casmurro\",\n        \"author\": \"Machado de Assis\",\n        \"publication_date\": \"1899-01-01\",\n        \"summary\": \"Romance que narra a história de Bentinho e Capitu.\"\n      }\n    ],\n    \"total\": 1,\n    \"page\": 1,\n    \"page_size\": 10,\n    \"pages\": 1\n  }\n}",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/books/?title=dom", "host": ["{{base_url}}"], "path": ["books", ""], "query": [{ "key": "title", "value": "dom" }] }
+              }
+            },
+            {
+              "name": "200 OK - segunda página",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status_code\": 200,\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": 11,\n        \"title\": \"Livro 11\",\n        \"author\": \"Autor\",\n        \"publication_date\": \"2000-01-01\",\n        \"summary\": null\n      }\n    ],\n    \"total\": 11,\n    \"page\": 2,\n    \"page_size\": 10,\n    \"pages\": 2\n  }\n}",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/books/?page=2&page_size=10", "host": ["{{base_url}}"], "path": ["books", ""], "query": [{ "key": "page", "value": "2" }, { "key": "page_size", "value": "10" }] }
+              }
+            },
+            {
+              "name": "422 Unprocessable Entity - page=0",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": [\n    {\n      \"type\": \"greater_than_equal\",\n      \"loc\": [\"query\", \"page\"],\n      \"msg\": \"Input should be greater than or equal to 1\",\n      \"input\": \"0\"\n    }\n  ]\n}",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/books/?page=0", "host": ["{{base_url}}"], "path": ["books", ""], "query": [{ "key": "page", "value": "0" }] }
+              }
+            },
+            {
+              "name": "422 Unprocessable Entity - page_size=101",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": [\n    {\n      \"type\": \"less_than_equal\",\n      \"loc\": [\"query\", \"page_size\"],\n      \"msg\": \"Input should be less than or equal to 100\",\n      \"input\": \"101\"\n    }\n  ]\n}",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/books/?page_size=101", "host": ["{{base_url}}"], "path": ["books", ""], "query": [{ "key": "page_size", "value": "101" }] }
+              }
+            },
+            {
+              "name": "422 Unprocessable Entity - publication_date formato inválido",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": [\n    {\n      \"type\": \"date_from_datetime_parsing\",\n      \"loc\": [\"query\", \"publication_date\"],\n      \"msg\": \"Input should be a valid date or datetime, invalid character in year\",\n      \"input\": \"01-01-1899\"\n    }\n  ]\n}",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/books/?publication_date=01-01-1899", "host": ["{{base_url}}"], "path": ["books", ""], "query": [{ "key": "publication_date", "value": "01-01-1899" }] }
+              }
+            },
+            {
+              "name": "500 Internal Server Error",
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": \"Internal Server Error\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Buscar livro por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["books", "{{book_id}}"]
+            },
+            "description": "Retorna um livro ativo pelo ID. Livros com soft delete retornam 404."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status_code\": 200,\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Dom Casmurro\",\n    \"author\": \"Machado de Assis\",\n    \"publication_date\": \"1899-01-01\",\n    \"summary\": \"Romance que narra a história de Bentinho e Capitu.\"\n  }\n}",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/books/1", "host": ["{{base_url}}"], "path": ["books", "1"] }
+              }
+            },
+            {
+              "name": "404 Not Found",
+              "status": "Not Found",
+              "code": 404,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": \"Livro não encontrado\"\n}",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/books/9999", "host": ["{{base_url}}"], "path": ["books", "9999"] }
+              }
+            },
+            {
+              "name": "422 Unprocessable Entity - ID não numérico",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": [\n    {\n      \"type\": \"int_parsing\",\n      \"loc\": [\"path\", \"book_id\"],\n      \"msg\": \"Input should be a valid integer, unable to parse string as an integer\",\n      \"input\": \"abc\"\n    }\n  ]\n}",
+              "originalRequest": {
+                "method": "GET",
+                "url": { "raw": "{{base_url}}/books/abc", "host": ["{{base_url}}"], "path": ["books", "abc"] }
+              }
+            },
+            {
+              "name": "500 Internal Server Error",
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": \"Internal Server Error\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Atualizar livro",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Dom Casmurro - Edição Revisada\",\n  \"summary\": \"Resumo atualizado da obra.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["books", "{{book_id}}"]
+            },
+            "description": "Atualização parcial — apenas os campos enviados no body são modificados.\nAo menos um campo deve ser informado.\nNão é possível atualizar livros inativados (soft deleted)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status_code\": 200,\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Dom Casmurro - Edição Revisada\",\n    \"author\": \"Machado de Assis\",\n    \"publication_date\": \"1899-01-01\",\n    \"summary\": \"Resumo atualizado da obra.\"\n  }\n}",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Dom Casmurro - Edição Revisada\",\n  \"summary\": \"Resumo atualizado da obra.\"\n}"
+                },
+                "url": { "raw": "{{base_url}}/books/1", "host": ["{{base_url}}"], "path": ["books", "1"] }
+              }
+            },
+            {
+              "name": "404 Not Found - livro não existe ou foi deletado",
+              "status": "Not Found",
+              "code": 404,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": \"Livro não encontrado\"\n}",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"title\": \"Qualquer\"\n}" },
+                "url": { "raw": "{{base_url}}/books/9999", "host": ["{{base_url}}"], "path": ["books", "9999"] }
+              }
+            },
+            {
+              "name": "422 Unprocessable Entity - body vazio",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": \"Nenhum campo fornecido para atualização\"\n}",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{}" },
+                "url": { "raw": "{{base_url}}/books/1", "host": ["{{base_url}}"], "path": ["books", "1"] }
+              }
+            },
+            {
+              "name": "422 Unprocessable Entity - title vazio",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": [\n    {\n      \"type\": \"string_too_short\",\n      \"loc\": [\"body\", \"title\"],\n      \"msg\": \"String should have at least 1 character\",\n      \"input\": \"\"\n    }\n  ]\n}",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"title\": \"\"\n}" },
+                "url": { "raw": "{{base_url}}/books/1", "host": ["{{base_url}}"], "path": ["books", "1"] }
+              }
+            },
+            {
+              "name": "422 Unprocessable Entity - ID não numérico",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": [\n    {\n      \"type\": \"int_parsing\",\n      \"loc\": [\"path\", \"book_id\"],\n      \"msg\": \"Input should be a valid integer, unable to parse string as an integer\",\n      \"input\": \"abc\"\n    }\n  ]\n}",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"title\": \"Título\"\n}" },
+                "url": { "raw": "{{base_url}}/books/abc", "host": ["{{base_url}}"], "path": ["books", "abc"] }
+              }
+            },
+            {
+              "name": "500 Internal Server Error",
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": \"Internal Server Error\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remover livro (soft delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/books/{{book_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["books", "{{book_id}}"]
+            },
+            "description": "Desativa o livro (soft delete). O registro permanece no banco mas deixa de aparecer em qualquer consulta.\nUm segundo DELETE no mesmo ID retorna 404."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status_code\": 200,\n  \"data\": null\n}",
+              "originalRequest": {
+                "method": "DELETE",
+                "url": { "raw": "{{base_url}}/books/1", "host": ["{{base_url}}"], "path": ["books", "1"] }
+              }
+            },
+            {
+              "name": "404 Not Found - livro não existe ou já foi deletado",
+              "status": "Not Found",
+              "code": 404,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": \"Livro não encontrado\"\n}",
+              "originalRequest": {
+                "method": "DELETE",
+                "url": { "raw": "{{base_url}}/books/9999", "host": ["{{base_url}}"], "path": ["books", "9999"] }
+              }
+            },
+            {
+              "name": "422 Unprocessable Entity - ID não numérico",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": [\n    {\n      \"type\": \"int_parsing\",\n      \"loc\": [\"path\", \"book_id\"],\n      \"msg\": \"Input should be a valid integer, unable to parse string as an integer\",\n      \"input\": \"abc\"\n    }\n  ]\n}",
+              "originalRequest": {
+                "method": "DELETE",
+                "url": { "raw": "{{base_url}}/books/abc", "host": ["{{base_url}}"], "path": ["books", "abc"] }
+              }
+            },
+            {
+              "name": "500 Internal Server Error",
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"detail\": \"Internal Server Error\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
